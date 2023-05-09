@@ -108,11 +108,9 @@ class Main:
     enabled_hold = False
 
     def __init__(self):
-        # super(Main, self).__init__(title="ArcoLinux App")
-
         self.hold_alacritty = False
-        # self.iso_choices = Gtk.ComboBoxText()
-
+        self.packagesp = ""
+        # self.packages_path =
         self.timeout_id = None
         # https://python-gtk-3-tutorial.readthedocs.io/en/latest/builder.html
         self.builder = Gtk.Builder()
@@ -140,8 +138,6 @@ class Main:
     def on_iso_choices_changed(self, widget):
         text = widget.get_active_text()
         self.choice = text
-        if text is not None:
-            logging.info("ArcoLinux ISO selection is: %s", text)
 
     def on_hold_toggled(self, widget):
         enabled_hold = widget.get_active()
@@ -154,183 +150,158 @@ class Main:
     def on_create_arco_clicked(self, widget):
         now = datetime.now().strftime("%H:%M:%S")
 
-        if self.choice is not None:
-            logging.info("ArcoLinux iso selection is: %s", self.choice)
-            print("[INFO] : Let's build an ArcoLinux iso : " + self.choice)
+        logging.info("ArcoLinux iso selection is: %s", self.choice)
+        print("[INFO] : Let's build an ArcoLinux iso : " + self.choice)
+        fn.create_actions_log(
+            launchtime,
+            "[INFO] %s Let's build an ArcoLinux iso" % now + "\n",
+        )
+        # installing archiso if needed
+        package = "archiso"
+        fn.install_package(self, package)
+
+        # if arcolinux mirror and key not installed
+        if not fn.check_package_installed(
+            "arcolinux-keyring"
+        ) or not fn.check_package_installed("arcolinux-mirrorlist-git"):
+            print("[INFO] : Installing the ArcoLinux keyring and mirrorlist")
             fn.create_actions_log(
                 launchtime,
-                "[INFO] %s Let's build an ArcoLinux iso" % now + "\n",
+                "[INFO] %s Installing the ArcoLinux keyring and mirrorlist" % str(now)
+                + "\n",
             )
-            # installing archiso if needed
-            package = "archiso"
-            fn.install_package(self, package)
+            fn.install_arcolinux_key_mirror(self)
+            fn.add_repos()
+            self.arco_key_mirror.set_label("Remove")
+            self.arco_key_mirror._value = 2
 
-            # if arcolinux mirror and key not installed
-            if not fn.check_package_installed(
-                "arcolinux-keyring"
-            ) or not fn.check_package_installed("arcolinux-mirrorlist-git"):
-                print("[INFO] : Installing the ArcoLinux keyring and mirrorlist")
-                fn.create_actions_log(
-                    launchtime,
-                    "[INFO] %s Installing the ArcoLinux keyring and mirrorlist"
-                    % str(now)
-                    + "\n",
-                )
-                fn.install_arcolinux_key_mirror(self)
-                fn.add_repos()
-                self.arco_key_mirror.set_label("Remove")
-                self.arco_key_mirror._value = 2
+        # making sure we start with a clean slate
+        print("[INFO] : Let's remove any old previous building folders")
+        fn.remove_dir(self, "/root/ArcoLinux-Out")
+        fn.remove_dir(self, "/root/ArcoLinuxB-Out")
+        fn.remove_dir(self, "/root/ArcoLinuxD-Out")
+        fn.remove_dir(self, "/root/arcolinux-build")
+        fn.remove_dir(self, "/root/arcolinuxd-build")
+        fn.remove_dir(self, "/root/arcolinuxb-build")
 
-            # making sure we start with a clean slate
-            print("[INFO] : Let's remove any old previous building folders")
-            fn.remove_dir(self, "/root/ArcoLinux-Out")
-            fn.remove_dir(self, "/root/ArcoLinuxB-Out")
-            fn.remove_dir(self, "/root/ArcoLinuxD-Out")
-            fn.remove_dir(self, "/root/arcolinux-build")
-            fn.remove_dir(self, "/root/arcolinuxd-build")
-            fn.remove_dir(self, "/root/arcolinuxb-build")
+        # git clone the iso scripts
 
-            # git clone the iso scripts
-
-            if "b" in self.choice:
-                print("[INFO] : Changing the B name")
-                self.choice = self.choice.replace("linuxb", "")
-                print("[INFO] : Renaming done to :" + self.choice)
-                # B isos
-
-                command = (
-                    "git clone https://github.com/arcolinuxb/"
-                    + self.choice
-                    + " /tmp/"
-                    + self.choice
-                )
-            else:
-                # core isos
-                command = (
-                    "git clone https://github.com/arcolinux/"
-                    + self.choice
-                    + "-iso /tmp/"
-                    + self.choice
-                )
-            print("[INFO] : git cloning the build folder")
-            try:
-                fn.run_command(command)
-            except Exception as error:
-                print(error)
-
-            # launch the scripts
-            # /tmp/arcolinuxd/installation-scripts/40-build-the-iso-local-again.sh
-
-            print("[INFO] : Start building the iso in Alacritty")
-            print(
-                "[INFO] : #################################################################"
-            )
-            print("[INFO] : Sometimes you have to try and build it a second time")
-            print(
-                "[INFO] : for it to work because of the special packages from AUR and repos"
-            )
-            print(
-                "[INFO] : ##################################################################"
-            )
-
-            print(
-                "[INFO] : Changed to /tmp/"
-                + self.choice
-                + "/installation-scripts/"
-                + " folder"
-            )
-            fn.os.chdir("/tmp/" + self.choice + "/installation-scripts/")
+        if "b" in self.choice:
+            print("[INFO] : Changing the B name")
+            self.choice = self.choice.replace("linuxb", "")
+            print("[INFO] : Renaming done to :" + self.choice)
+            # B isos
 
             command = (
-                "/tmp/"
+                "git clone https://github.com/arcolinuxb/"
                 + self.choice
-                + "/installation-scripts/40-build-the-iso-local-again.sh"
+                + " /tmp/"
+                + self.choice
             )
+        else:
+            # core isos
+            command = (
+                "git clone https://github.com/arcolinux/"
+                + self.choice
+                + "-iso /tmp/"
+                + self.choice
+            )
+        print("[INFO] : git cloning the build folder")
+        try:
+            fn.run_command(command)
+        except Exception as error:
+            print(error)
 
-            print("[INFO] : Launching the building script")
+        # launch the scripts
+        # /tmp/arcolinuxd/installation-scripts/40-build-the-iso-local-again.sh
+
+        print("[INFO] : Start building the iso in Alacritty")
+        print(
+            "[INFO] : #################################################################"
+        )
+        print("[INFO] : Sometimes you have to try and build it a second time")
+        print(
+            "[INFO] : for it to work because of the special packages from AUR and repos"
+        )
+        print(
+            "[INFO] : ##################################################################"
+        )
+
+        print(
+            "[INFO] : Changed to /tmp/"
+            + self.choice
+            + "/installation-scripts/"
+            + " folder"
+        )
+        fn.os.chdir("/tmp/" + self.choice + "/installation-scripts/")
+
+        command = (
+            "/tmp/"
+            + self.choice
+            + "/installation-scripts/40-build-the-iso-local-again.sh"
+        )
+
+        print("[INFO] : Launching the building script")
+        fn.create_actions_log(
+            launchtime,
+            "[INFO] %s Launching the building script" % str(now) + "\n",
+        )
+
+        if self.hold_alacritty:
+            critty = "alacritty --hold -e"
+            print("[INFO] : Using the hold option")
             fn.create_actions_log(
                 launchtime,
-                "[INFO] %s Launching the building script" % str(now) + "\n",
+                "[INFO] %s Using the hold option" % str(now) + "\n",
             )
+        else:
+            print("[INFO] : Not using the hold option")
+            fn.create_actions_log(
+                launchtime,
+                "[INFO] %s Not using the hold option" % str(now) + "\n",
+            )
+            critty = "alacritty -e"
 
-            if self.hold_alacritty:
-                critty = "alacritty --hold -e"
-                print("[INFO] : Using the hold option")
-                fn.create_actions_log(
-                    launchtime,
-                    "[INFO] %s Using the hold option" % str(now) + "\n",
-                )
-            else:
-                print("[INFO] : Not using the hold option")
-                fn.create_actions_log(
-                    launchtime,
-                    "[INFO] %s Not using the hold option" % str(now) + "\n",
-                )
-                critty = "alacritty -e"
+        try:
+            fn.subprocess.call(
+                critty + command,
+                shell=True,
+                stdout=fn.subprocess.PIPE,
+                stderr=fn.subprocess.STDOUT,
+            )
+        except Exception as error:
+            print(error)
 
-            try:
-                fn.subprocess.call(
-                    critty + command,
-                    shell=True,
-                    stdout=fn.subprocess.PIPE,
-                    stderr=fn.subprocess.STDOUT,
-                )
-            except Exception as error:
-                print(error)
+        # change the foldername
+        if (
+            self.choice == "arcolinuxl"
+            or self.choice == "arcolinuxs"
+            or self.choice == "arcolinuxs-lts"
+            or self.choice == "arcolinuxs-zen"
+            or self.choice == "arcolinuxs-xanmod"
+        ):
+            dir = "ArcoLinux-Out"
+        elif self.choice == "arcolinuxd":
+            dir = "ArcoLinuxD-Out"
+        else:
+            dir = "ArcoLinuxB-Out"
+        path_dir = "/root/" + dir
+        destination = fn.home + "/" + dir
+        print("[INFO] : Move folder to home directory")
+        try:
+            fn.shutil.copytree(path_dir, destination, dirs_exist_ok=True)
+            GLib.idle_add(
+                fn.show_in_app_notification,
+                self,
+                "The creation of the ArcoLinux iso is finished",
+                False,
+            )
+        except Exception as error:
+            print(error)
 
-            # if self.enable_hold.get_active():
-            #     try:
-            #         fn.subprocess.call(
-            #             "alacritty --hold -e" + command,
-            #             shell=True,
-            #             stdout=fn.subprocess.PIPE,
-            #             stderr=fn.subprocess.STDOUT,
-            #         )
-            #     except Exception as error:
-            #         print(error)
-            # else:
-            #     try:
-            #         fn.subprocess.call(
-            #             "alacritty -e" + command,
-            #             shell=True,
-            #             stdout=fn.subprocess.PIPE,
-            #             stderr=fn.subprocess.STDOUT,
-            #         )
-            #     except Exception as error:
-            #         print(error)
-
-            # move iso from /root/ArcoLinux-Out/ to home directory
-
-            # change the foldername
-            if (
-                self.choice == "arcolinuxl"
-                or self.choice == "arcolinuxs"
-                or self.choice == "arcolinuxs-lts"
-                or self.choice == "arcolinuxs-zen"
-                or self.choice == "arcolinuxs-xanmod"
-            ):
-                dir = "ArcoLinux-Out"
-            elif self.choice == "arcolinuxd":
-                dir = "ArcoLinuxD-Out"
-            else:
-                dir = "ArcoLinuxB-Out"
-            path_dir = "/root/" + dir
-            destination = fn.home + "/" + dir
-            print("[INFO] : Move folder to home directory")
-            try:
-                fn.shutil.copytree(path_dir, destination, dirs_exist_ok=True)
-                GLib.idle_add(
-                    fn.show_in_app_notification,
-                    self,
-                    "The creation of the ArcoLinux iso is finished",
-                    False,
-                )
-            except Exception as error:
-                print(error)
-
-            # changing permission
-            fn.permissions(destination)
-            print("[INFO] : Check your home directory for the iso")
+        # changing permission
+        fn.permissions(destination)
+        print("[INFO] : Check your home directory for the iso")
 
     def on_create_arch_clicked(self, widget):
         now = datetime.now().strftime("%H:%M:%S")
@@ -606,7 +577,6 @@ class Main:
         )
 
     def on_find_path(self, widget):
-        print("path")
         dialog = Gtk.FileChooserDialog(
             title="Please choose a file",
             action=Gtk.FileChooserAction.OPEN,
@@ -628,13 +598,16 @@ class Main:
     def open_response_cb(self, dialog, response):
         if response == Gtk.ResponseType.OK:
             self.packages_path.set_text(dialog.get_filename())
+            self.packagesp = self.packages_path.set_text(dialog.get_filename())
             dialog.destroy()
         elif response == Gtk.ResponseType.CANCEL:
             dialog.destroy()
 
     def on_pacman_install_packages(self, widget):
         now = datetime.now().strftime("%H:%M:%S")
-        path = self.packages_path.get_text()
+        path = self.packagesp
+        print("erik")
+        print(path)
         if len(path) > 1 and not path == "Choose a file first":
             print("[INFO] : Installing packages from selected file")
             print("[INFO] : You selected this file")
@@ -660,7 +633,7 @@ class Main:
             )
         else:
             print("[INFO] : First select a file")
-            self.packages_path.set_text("Choose a file first")
+            # self.packagesp("Choose a file first")
 
 
 if __name__ == "__main__":
