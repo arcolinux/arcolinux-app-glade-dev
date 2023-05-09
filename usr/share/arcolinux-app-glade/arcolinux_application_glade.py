@@ -636,7 +636,7 @@ class Main:
 if __name__ == "__main__":
     # find date and time
     # now = fn.datetime.datetime.now() <-- Fixed below for "import datetime from datetime"
-    now = date.now()
+    now = datetime.now()
 
     # defining handlers for terminal and log file
     handlers = [
