@@ -5,7 +5,7 @@
 
 import logging
 import datetime
-from datetime import datetime
+from datetime import datetime  # we can keep the import as "datetime from datetime" just change to reflect in line 638
 from time import sleep
 
 import functions as fn
@@ -19,10 +19,11 @@ gi.require_version("Gtk", "3.0")
 # https://docs.gtk.org/gdk3/
 from gi.repository import GdkPixbuf, GLib, Gtk, Gdk  # noqa
 
-now = datetime.now()
-global launchtime
+# Not needed now as this was the old logging method
+# now = datetime.now()
+# global launchtime
 # launchtime = file in /var/log
-launchtime = now.strftime("%Y-%m-%d-%H-%M-%S")
+# launchtime = now.strftime("%Y-%m-%d-%H-%M-%S")
 
 if not fn.path.exists(fn.log_dir):
     fn.mkdir(fn.log_dir)
@@ -634,7 +635,8 @@ class Main:
 
 if __name__ == "__main__":
     # find date and time
-    now = fn.datetime.datetime.now()
+    # now = fn.datetime.datetime.now() <-- Fixed below for "import datetime from datetime"
+    now = date.now()
 
     # defining handlers for terminal and log file
     handlers = [
