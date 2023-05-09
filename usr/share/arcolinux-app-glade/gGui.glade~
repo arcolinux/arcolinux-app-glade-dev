@@ -49,7 +49,6 @@
                         <property name="height-request">30</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
-                        <property name="active">0</property>
                         <items>
                           <item translatable="yes">arcolinuxl</item>
                           <item translatable="yes">arcolinuxd</item>
