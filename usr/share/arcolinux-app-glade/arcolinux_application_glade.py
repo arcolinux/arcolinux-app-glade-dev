@@ -3,17 +3,21 @@
 # =                  Author: Erik Dubois                          =
 # =================================================================
 
+import logging
+import datetime
 from datetime import datetime
 from time import sleep
 
 import functions as fn
+
+# Importing gi
 import gi
-import gui
 import splash
 
+# https://docs.gtk.org/gtk3/
 gi.require_version("Gtk", "3.0")
-
-from gi.repository import GdkPixbuf, Gtk, GLib  # noqa
+# https://docs.gtk.org/gdk3/
+from gi.repository import GdkPixbuf, GLib, Gtk, Gdk  # noqa
 
 now = datetime.now()
 global launchtime
@@ -97,15 +101,16 @@ if fn.path.isfile(fn.mirrorlist):
             print(error)
 
 
-class Main(Gtk.Window):
+# https://docs.python.org/3/tutorial/classes.html
+# https://realpython.com/python-main-function/
+class Main:
     def __init__(self):
-        super(Main, self).__init__(title="ArcoLinux App")
-        self.set_border_width(10)
-        self.set_default_size(900, 650)
-        self.set_icon_from_file(fn.os.path.join(fn.base_dir, "images/arcolinux.png"))
-        self.set_position(Gtk.WindowPosition.CENTER)
-        self.timeout_id = None
+        # super(Main, self).__init__(title="ArcoLinux App")
 
+        self.timeout_id = None
+        # https://python-gtk-3-tutorial.readthedocs.io/en/latest/builder.html
+        self.builder = Gtk.Builder()
+        self.builder.add_from_file("gGui.glade")
         # splash screen
         splScr = splash.splashScreen()
         while Gtk.events_pending():
@@ -113,7 +118,15 @@ class Main(Gtk.Window):
         sleep(1)
         splScr.destroy()
 
-        gui.GUI(self, Gtk, GdkPixbuf, fn)
+        logging.info("Connecting the glad signals")
+        self.builder.connect_signals(self)
+
+        logging.info("create the main window")
+        window = self.builder.get_object("hWindow")
+        window.connect("delete-event", Gtk.main_quit)
+
+        logging.info("Display main window")
+        window.show()
 
     def on_close_clicked(self, widget):
         Gtk.main_quit()
@@ -620,7 +633,26 @@ class Main(Gtk.Window):
 
 
 if __name__ == "__main__":
-    w = Main()
-    w.connect("delete-event", Gtk.main_quit)
-    w.show_all()
+    # find date and time
+    now = fn.datetime.datetime.now()
+
+    # defining handlers for terminal and log file
+    handlers = [
+        logging.FileHandler(
+            "ArcoLinux-App-" + now.strftime("%Y-%m-%d-%H:%M:%S") + ".log"
+        ),
+        logging.StreamHandler(),
+    ]
+
+    # basic configuration
+    # https://docs.python.org/3/howto/logging.html (debug,info,warning,error,critical)
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s:%(levelname)s : %(message)s",
+        datefmt="%Y/%m/%d %H:%M:%S",
+        handlers=handlers,
+    )
+
+    logging.info("Starting Application")
+    main = Main()
     Gtk.main()
