@@ -20,74 +20,14 @@ gi.require_version("Gtk", "3.0")
 from gi.repository import Gdk, GdkPixbuf, GLib, Gtk  # noqa
 
 # constant values
-GUI_UI_FILE = "gGui.glade"
-LOGGING_FORMAT = "%Y/%m/%d %H:%M:%S"
-LOG_FILE = "ArcoLinux-App-{}.log".format(datetime.now().strftime(LOGGING_FORMAT))
+GUI_UI_FILE = "gGui.ui"
+LOGGING_FORMAT = "%Y-%m-%d-%H-%M-%S"
+LOG_FILE = "/var/log/arcolinux-app-glade/arcolinux-app-{}.log".format(
+    datetime.now().strftime(LOGGING_FORMAT)
+)
 
 if not fn.path.exists(fn.log_dir):
     fn.mkdir(fn.log_dir)
-
-logging.info("App Started")
-
-logging.info(
-    "---------------------------------------------------------------------------"
-)
-logging.info("[INFO] : pkgver = pkgversion")
-logging.info("[INFO] : pkgrel = pkgrelease")
-logging.info(
-    "---------------------------------------------------------------------------"
-)
-logging.info("[INFO] : Distro = " + fn.distr)
-logging.info(
-    "---------------------------------------------------------------------------"
-)
-
-logging.info("pkgver = pkgversion")
-logging.info("pkgrel = pkgrelease")
-
-# making sure the tool follows a dark or light theme
-if not fn.path.isdir("/root/.config/"):
-    try:
-        fn.mkdir("/root/.config", 0o766)
-    except Exception as error:
-        logging.info(error)
-
-if not fn.path.isdir("/root/.config/gtk-3.0"):
-    try:
-        fn.mkdir("/root/.config/gtk-3.0", 0o766)
-    except Exception as error:
-        logging.info(error)
-
-if not fn.path.isdir("/root/.config/gtk-4.0"):
-    try:
-        fn.mkdir("/root/.config/gtk-4.0", 0o766)
-    except Exception as error:
-        logging.info(error)
-
-if not fn.path.isdir("/root/.config/xsettingsd"):
-    try:
-        fn.mkdir("/root/.config/xsettingsd", 0o766)
-    except Exception as error:
-        logging.info(error)
-
-# make backup of /etc/pacman.conf
-if fn.path.isfile(fn.pacman_conf):
-    if not fn.path.isfile(fn.pacman_conf + ".bak"):
-        try:
-            fn.shutil.copy(fn.pacman_conf, fn.pacman_conf + ".bak")
-            logging.info("Making a backup of /etc/pacman.conf")
-        except Exception as error:
-            logging.info(error)
-
-# ensuring we have a backup or the arcolinux mirrorlist
-if fn.path.isfile(fn.mirrorlist):
-    if not fn.path.isfile(fn.mirrorlist + ".bak"):
-        try:
-            fn.shutil.copy(fn.mirrorlist, fn.mirrorlist + ".bak")
-            logging.info("Making a backup of /etc/pacman.d/mirrorlist")
-
-        except Exception as error:
-            logging.info(error)
 
 
 # https://docs.python.org/3/tutorial/classes.html
@@ -99,7 +39,85 @@ class Main:
     def __init__(self):
         # Setup intialization for logging and Gui
         self.setup_logging()
+        self.back_ups()
+        self.versioning()
         self.setup_gui()
+
+    def setup_logging(self):
+        # defining handlers for terminal and log file
+        self.handlers = [
+            logging.FileHandler(LOG_FILE),
+            logging.StreamHandler(),
+        ]
+
+        # basic configuration
+        # https://docs.python.org/3/howto/logging.html (debug,info,warning,error,critical)
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format="%(asctime)s:%(levelname)s : %(message)s",
+            datefmt=LOGGING_FORMAT,
+            handlers=self.handlers,
+        )
+
+    def back_ups(self):
+        # making sure the tool follows a dark or light theme
+        if not fn.path.isdir("/root/.config/"):
+            try:
+                fn.mkdir("/root/.config", 0o766)
+            except Exception as error:
+                logging.info(error)
+
+        if not fn.path.isdir("/root/.config/gtk-3.0"):
+            try:
+                fn.mkdir("/root/.config/gtk-3.0", 0o766)
+            except Exception as error:
+                logging.info(error)
+
+        if not fn.path.isdir("/root/.config/gtk-4.0"):
+            try:
+                fn.mkdir("/root/.config/gtk-4.0", 0o766)
+            except Exception as error:
+                logging.info(error)
+
+        if not fn.path.isdir("/root/.config/xsettingsd"):
+            try:
+                fn.mkdir("/root/.config/xsettingsd", 0o766)
+            except Exception as error:
+                logging.info(error)
+
+        # make backup of /etc/pacman.conf
+        if fn.path.isfile(fn.pacman_conf):
+            if not fn.path.isfile(fn.pacman_conf + ".bak"):
+                try:
+                    fn.shutil.copy(fn.pacman_conf, fn.pacman_conf + ".bak")
+                    logging.info("Making a backup of /etc/pacman.conf")
+                except Exception as error:
+                    logging.info(error)
+
+        # ensuring we have a backup or the arcolinux mirrorlist
+        if fn.path.isfile(fn.mirrorlist):
+            if not fn.path.isfile(fn.mirrorlist + ".bak"):
+                try:
+                    fn.shutil.copy(fn.mirrorlist, fn.mirrorlist + ".bak")
+                    logging.info("Making a backup of /etc/pacman.d/mirrorlist")
+
+                except Exception as error:
+                    logging.info(error)
+
+    def versioning(self):
+        logging.info("App Started")
+        logging.info(
+            "---------------------------------------------------------------------------"
+        )
+        logging.info("pkgver = pkgversion")
+        logging.info("pkgrel = pkgrelease")
+        logging.info(
+            "---------------------------------------------------------------------------"
+        )
+        logging.info("Distro = " + fn.distr)
+        logging.info(
+            "---------------------------------------------------------------------------"
+        )
 
     def setup_gui(self):
         self.hold_alacritty = False
@@ -110,7 +128,7 @@ class Main:
         # https://python-gtk-3-tutorial.readthedocs.io/en/latest/builder.html
         logging.info("Building the Gui from the glade file")
         self.builder = Gtk.Builder()
-        self.builder.add_from_file("gGui.glade")
+        self.builder.add_from_file(GUI_UI_FILE)
 
         # splash screen
         splScr = splash.splashScreen()
@@ -129,24 +147,16 @@ class Main:
         logging.info("Display main window")
         window.show()
 
-    def setup_logging(self):
-        # defining handlers for terminal and log file
-        handlers = [
-            logging.FileHandler(LOG_FILE),
-            logging.StreamHandler(),
-        ]
-
-        # basic configuration
-        # https://docs.python.org/3/howto/logging.html (debug,info,warning,error,critical)
-        logging.basicConfig(
-            level=logging.DEBUG,
-            format="%(asctime)s:%(levelname)s : %(message)s",
-            datefmt=LOGGING_FORMAT,
-            handlers=handlers,
-        )
-
     def on_close_clicked(self, widget):
         Gtk.main_quit()
+
+    ############################################################################
+    ############################################################################
+    ############################################################################
+    # Start application
+    ############################################################################
+    ############################################################################
+    ############################################################################
 
     def on_iso_choices_changed(self, widget):
         text = widget.get_active_text()
@@ -171,7 +181,7 @@ class Main:
         if not fn.check_package_installed(
             "arcolinux-keyring"
         ) or not fn.check_package_installed("arcolinux-mirrorlist-git"):
-            logging.info("[INFO] : Installing the ArcoLinux keyring and mirrorlist")
+            logging.info("Installing the ArcoLinux keyring and mirrorlist")
 
             fn.install_arcolinux_key_mirror(self)
             fn.add_repos()
@@ -179,7 +189,7 @@ class Main:
             self.arco_key_mirror._value = 2
 
         # making sure we start with a clean slate
-        logging.info("[INFO] : Let's remove any old previous building folders")
+        logging.info("Let's remove any old previous building folders")
         fn.remove_dir(self, "/root/ArcoLinux-Out")
         fn.remove_dir(self, "/root/ArcoLinuxB-Out")
         fn.remove_dir(self, "/root/ArcoLinuxD-Out")
@@ -190,9 +200,9 @@ class Main:
         # git clone the iso scripts
 
         if "b" in self.choice:
-            logging.info("[INFO] : Changing the B name")
+            logging.info("Changing the B name")
             self.choice = self.choice.replace("linuxb", "")
-            logging.info("[INFO] : Renaming done to :" + self.choice)
+            logging.info("Renaming done to :" + self.choice)
             # B isos
 
             command = (
@@ -209,7 +219,7 @@ class Main:
                 + "-iso /tmp/"
                 + self.choice
             )
-        logging.info("[INFO] : git cloning the build folder")
+        logging.info("git cloning the build folder")
         try:
             fn.run_command(command)
         except Exception as error:
@@ -218,23 +228,20 @@ class Main:
         # launch the scripts
         # /tmp/arcolinuxd/installation-scripts/40-build-the-iso-local-again.sh
 
-        logging.info("[INFO] : Start building the iso in Alacritty")
+        logging.info("Start building the iso in Alacritty")
         logging.info(
-            "[INFO] : #################################################################"
+            "#################################################################"
         )
-        logging.info("[INFO] : Sometimes you have to try and build it a second time")
+        logging.info("Sometimes you have to try and build it a second time")
         logging.info(
-            "[INFO] : for it to work because of the special packages from AUR and repos"
+            "for it to work because of the special packages from AUR and repos"
         )
         logging.info(
-            "[INFO] : ##################################################################"
+            "##################################################################"
         )
 
         logging.info(
-            "[INFO] : Changed to /tmp/"
-            + self.choice
-            + "/installation-scripts/"
-            + " folder"
+            "Changed to /tmp/" + self.choice + "/installation-scripts/" + " folder"
         )
         fn.os.chdir("/tmp/" + self.choice + "/installation-scripts/")
 
@@ -513,9 +520,9 @@ class Main:
     def on_pacman_install_packages(self, widget):
         path = self.packagesp
         if len(path) > 1 and not path == "Choose a file first":
-            logging.info("[INFO] : Installing packages from selected file")
-            logging.info("[INFO] : You selected this file")
-            logging.info("[INFO] : File: " + path)
+            logging.info("Installing packages from selected file")
+            logging.info("You selected this file")
+            logging.info("File: " + path)
             fn.install_packages_path(self, self.packages_path.get_text())
             GLib.idle_add(
                 fn.show_in_app_notification,
@@ -524,7 +531,7 @@ class Main:
                 False,
             )
         else:
-            logging.info("[INFO] : First select a file")
+            logging.info("First select a file")
             # self.packagesp("Choose a file first")
 
 
