@@ -2,7 +2,6 @@
 # =                  Author: Erik Dubois                          =
 # =================================================================
 
-import datetime
 import os
 import shutil
 import subprocess

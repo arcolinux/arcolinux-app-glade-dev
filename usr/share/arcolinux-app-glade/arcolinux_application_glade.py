@@ -137,7 +137,7 @@ class Main:
         self.builder = Gtk.Builder()
         self.builder.add_from_file(GUI_UI_FILE)
 
-        logging.info("Connecting the glad signals")
+        logging.info("Connecting the glade signals")
         self.builder.connect_signals(self)
 
         logging.info("Referencing the Gtk window 'hwindow' ID")
@@ -319,7 +319,7 @@ class Main:
         fn.run_command(command)
 
         # changing permission
-        x = fn.datetime.datetime.now()
+        x = datetime.now()
         year = str(x.year)
         month = str(x.strftime("%m"))
         day = str(x.strftime("%d"))
@@ -492,29 +492,6 @@ class Main:
             "We have used the cached pacman.conf",
             False,
         )
-
-    # def on_find_path(self, widget):
-    #     dialog = Gtk.FileChooserDialog(
-    #         title="Please choose a file",
-    #         action=Gtk.FileChooserAction.OPEN,
-    #     )
-    #     filter = Gtk.FileFilter()
-    #     filter.set_name("Text files")
-    #     dialog.set_current_folder(fn.home)
-    #     dialog.add_buttons(
-    #         Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Open", Gtk.ResponseType.OK
-    #     )
-    #     dialog.connect("response", self.open_response_cb)
-
-    #     dialog.show()
-
-    # def open_response_cb(self, dialog, response):
-    #     if response == Gtk.ResponseType.OK:
-    #         self.packages_path.set_text(dialog.get_filename())
-    #         self.packagesp = self.packages_path.set_text(dialog.get_filename())
-    #         dialog.destroy()
-    #     elif response == Gtk.ResponseType.CANCEL:
-    #         dialog.destroy()
 
     def on_pacman_install_packages(self, widget):
         filechooserbutton = self.builder.get_object("install_path")
