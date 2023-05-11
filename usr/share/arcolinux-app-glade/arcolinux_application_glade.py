@@ -38,10 +38,19 @@ class Main:
 
     def __init__(self):
         # Setup intialization for logging and Gui
+        self.splash()
         self.setup_logging()
         self.back_ups()
         self.versioning()
         self.setup_gui()
+
+    def splash(self):
+        # splash screen
+        splScr = splash.splashScreen()
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+        sleep(1)
+        splScr.destroy()
 
     def setup_logging(self):
         # defining handlers for terminal and log file
@@ -120,22 +129,12 @@ class Main:
         )
 
     def setup_gui(self):
-        self.hold_alacritty = False
-        self.packagesp = ""
-        # self.packages_path =
         self.timeout_id = None
 
         # https://python-gtk-3-tutorial.readthedocs.io/en/latest/builder.html
         logging.info("Building the Gui from the glade file")
         self.builder = Gtk.Builder()
         self.builder.add_from_file(GUI_UI_FILE)
-
-        # splash screen
-        splScr = splash.splashScreen()
-        while Gtk.events_pending():
-            Gtk.main_iteration()
-        sleep(1)
-        splScr.destroy()
 
         logging.info("Connecting the glad signals")
         self.builder.connect_signals(self)
@@ -159,13 +158,12 @@ class Main:
     ############################################################################
 
     def on_iso_choices_changed(self, widget):
-        text = widget.get_active_text()
-        self.choice = text
+        self.choice = widget.get_active_text()
+        logging.info("You selected = " + self.choice)
 
     def on_hold_toggled(self, widget):
-        enabled_hold = widget.get_active()
-        self.hold_alacritty = enabled_hold
-        if enabled_hold:
+        self.enabled_hold = widget.get_active()
+        if self.enabled_hold:
             logging.info("--hold for Alacritty is on")
         else:
             logging.info("--hold for Alacritty is off")
@@ -253,7 +251,7 @@ class Main:
 
         logging.info("Launching the building script")
 
-        if self.hold_alacritty:
+        if self.enabled_hold:
             critty = "alacritty --hold -e"
             logging.info("Using the hold option")
         else:
@@ -494,36 +492,37 @@ class Main:
             False,
         )
 
-    def on_find_path(self, widget):
-        dialog = Gtk.FileChooserDialog(
-            title="Please choose a file",
-            action=Gtk.FileChooserAction.OPEN,
-        )
-        filter = Gtk.FileFilter()
-        filter.set_name("Text files")
-        dialog.set_current_folder(fn.home)
-        dialog.add_buttons(
-            Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Open", Gtk.ResponseType.OK
-        )
-        dialog.connect("response", self.open_response_cb)
+    # def on_find_path(self, widget):
+    #     dialog = Gtk.FileChooserDialog(
+    #         title="Please choose a file",
+    #         action=Gtk.FileChooserAction.OPEN,
+    #     )
+    #     filter = Gtk.FileFilter()
+    #     filter.set_name("Text files")
+    #     dialog.set_current_folder(fn.home)
+    #     dialog.add_buttons(
+    #         Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL, "Open", Gtk.ResponseType.OK
+    #     )
+    #     dialog.connect("response", self.open_response_cb)
 
-        dialog.show()
+    #     dialog.show()
 
-    def open_response_cb(self, dialog, response):
-        if response == Gtk.ResponseType.OK:
-            self.packages_path.set_text(dialog.get_filename())
-            self.packagesp = self.packages_path.set_text(dialog.get_filename())
-            dialog.destroy()
-        elif response == Gtk.ResponseType.CANCEL:
-            dialog.destroy()
+    # def open_response_cb(self, dialog, response):
+    #     if response == Gtk.ResponseType.OK:
+    #         self.packages_path.set_text(dialog.get_filename())
+    #         self.packagesp = self.packages_path.set_text(dialog.get_filename())
+    #         dialog.destroy()
+    #     elif response == Gtk.ResponseType.CANCEL:
+    #         dialog.destroy()
 
     def on_pacman_install_packages(self, widget):
-        path = self.packagesp
-        if len(path) > 1 and not path == "Choose a file first":
+        filechooserbutton = self.builder.get_object("install_path")
+        path = filechooserbutton.get_filename()
+        if len(path) > 1:
             logging.info("Installing packages from selected file")
             logging.info("You selected this file")
             logging.info("File: " + path)
-            fn.install_packages_path(self, self.packages_path.get_text())
+            fn.install_packages_path(self, path)
             GLib.idle_add(
                 fn.show_in_app_notification,
                 self,
@@ -532,7 +531,6 @@ class Main:
             )
         else:
             logging.info("First select a file")
-            # self.packagesp("Choose a file first")
 
 
 if __name__ == "__main__":
