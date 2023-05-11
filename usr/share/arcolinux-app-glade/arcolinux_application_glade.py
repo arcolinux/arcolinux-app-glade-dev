@@ -22,7 +22,6 @@ from gi.repository import Gdk, GdkPixbuf, GLib, Gtk  # noqa
 # constant values
 BASE_DIR = fn.path.dirname(fn.path.realpath(__file__))
 GUI_UI_FILE = BASE_DIR + "/gGui.ui"
-print(GUI_UI_FILE)
 LOGGING_FORMAT = "%Y-%m-%d-%H-%M-%S"
 LOG_FILE = "/var/log/arcolinux-app-glade/arcolinux-app-{}.log".format(
     datetime.now().strftime(LOGGING_FORMAT)
