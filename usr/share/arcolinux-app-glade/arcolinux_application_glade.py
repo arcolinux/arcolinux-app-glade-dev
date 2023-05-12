@@ -385,7 +385,7 @@ class Main:
         GLib.idle_add(
             fn.show_in_app_notification,
             self,
-            "Let's fix the keys of Arch Linux",
+            "We fixed the keys of Arch Linux",
             False,
         )
 
@@ -521,6 +521,20 @@ class Main:
             )
         else:
             logging.info("First select a file")
+
+    def on_quit_button_clicked(self, widget):
+        Gtk.main_quit()
+        print(
+            "---------------------------------------------------------------------------"
+        )
+        print("Thanks for using the ArcoLinux Application")
+        print("We hope you enjoyed the Youtube tutorials")
+        print(
+            "https://www.youtube.com/playlist?list=PLlloYVGq5pS63vf2ksZntZmWwiJK_gtFt"
+        )
+        print(
+            "---------------------------------------------------------------------------"
+        )
 
 
 if __name__ == "__main__":
