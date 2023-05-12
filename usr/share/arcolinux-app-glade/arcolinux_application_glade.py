@@ -147,8 +147,8 @@ class Main:
 
         self.statusbar = self.builder.get_object("statusbar")
 
-        align = Gtk.Alignment(xalign=0.5, yalign=0.5)
-        align.add(self.statusbar)
+        # align = Gtk.Alignment(xalign=0.5, yalign=0.5)
+        # align.add(self.statusbar)
 
         logging.info("Display main window")
         window.show()
