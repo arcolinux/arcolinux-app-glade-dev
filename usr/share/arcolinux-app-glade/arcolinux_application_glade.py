@@ -22,7 +22,7 @@ from gi.repository import Gdk, GdkPixbuf, GLib, Gtk  # noqa
 # constant values
 BASE_DIR = fn.path.dirname(fn.path.realpath(__file__))
 # GUI_UI_FILE = BASE_DIR + "/gGui.ui"
-GUI_UI_FILE = BASE_DIR + "/gGui_statusbar.ui"
+GUI_UI_FILE = BASE_DIR + "/gGui_statusbar_center.ui"
 LOGGING_FORMAT = "%Y-%m-%d-%H-%M-%S"
 LOG_FILE = "/var/log/arcolinux-app-glade/arcolinux-app-{}.log".format(
     datetime.now().strftime(LOGGING_FORMAT)
@@ -76,25 +76,25 @@ class Main:
             try:
                 fn.mkdir("/root/.config", 0o766)
             except Exception as error:
-                logging.info(error)
+                logging.error(error)
 
         if not fn.path.isdir("/root/.config/gtk-3.0"):
             try:
                 fn.mkdir("/root/.config/gtk-3.0", 0o766)
             except Exception as error:
-                logging.info(error)
+                logging.error(error)
 
         if not fn.path.isdir("/root/.config/gtk-4.0"):
             try:
                 fn.mkdir("/root/.config/gtk-4.0", 0o766)
             except Exception as error:
-                logging.info(error)
+                logging.error(error)
 
         if not fn.path.isdir("/root/.config/xsettingsd"):
             try:
                 fn.mkdir("/root/.config/xsettingsd", 0o766)
             except Exception as error:
-                logging.info(error)
+                logging.error(error)
 
         # make backup of /etc/pacman.conf
         if fn.path.isfile(fn.pacman_conf):
@@ -103,7 +103,7 @@ class Main:
                     fn.shutil.copy(fn.pacman_conf, fn.pacman_conf + ".bak")
                     logging.info("Making a backup of /etc/pacman.conf")
                 except Exception as error:
-                    logging.info(error)
+                    logging.error(error)
 
         # ensuring we have a backup or the arcolinux mirrorlist
         if fn.path.isfile(fn.mirrorlist):
@@ -113,7 +113,7 @@ class Main:
                     logging.info("Making a backup of /etc/pacman.d/mirrorlist")
 
                 except Exception as error:
-                    logging.info(error)
+                    logging.error(error)
 
     def versioning(self):
         logging.info("App Started")
@@ -147,8 +147,17 @@ class Main:
 
         self.statusbar = self.builder.get_object("statusbar")
 
-        # align = Gtk.Alignment(xalign=0.5, yalign=0.5)
-        # align.add(self.statusbar)
+        message = Gtk.Label(label="Center-aligned message")
+        message.set_halign(Gtk.Align.CENTER)
+        message.set_valign(Gtk.Align.CENTER)
+        self.statusbarbox = Gtk.Box()
+        self.statusbarbox.set_halign(Gtk.Align.CENTER)
+        self.statusbarbox.set_valign(Gtk.Align.CENTER)
+        self.statusbarbox.pack_start(message, False, False, 0)
+
+        context_id = self.statusbar.get_context_id("example")
+        self.statusbar.push(context_id, message.get_text())
+        self.statusbar.pack_end(self.statusbarbox, False, False, 0)
 
         logging.info("Display main window")
         window.show()
@@ -228,7 +237,7 @@ class Main:
         try:
             fn.run_command(command)
         except Exception as error:
-            logging.info(error)
+            logging.error(error)
 
         # launch the scripts
         # /tmp/arcolinuxd/installation-scripts/40-build-the-iso-local-again.sh
@@ -273,7 +282,7 @@ class Main:
                 stderr=fn.subprocess.STDOUT,
             )
         except Exception as error:
-            logging.info(error)
+            logging.error(error)
 
         # change the foldername
         if (
@@ -300,7 +309,7 @@ class Main:
                 False,
             )
         except Exception as error:
-            logging.info(error)
+            logging.error(error)
 
         # changing permission
         fn.permissions(destination)
@@ -322,7 +331,10 @@ class Main:
 
         # starting the build script
         command = "mkarchiso -v -o " + fn.home + " /usr/share/archiso/configs/releng/"
-        fn.run_command(command)
+        try:
+            fn.run_command(command)
+        except Exception as error:
+            logging.error(error)
 
         # changing permission
         x = datetime.now()
@@ -369,7 +381,7 @@ class Main:
                 False,
             )
         except Exception as error:
-            logging.info(error)
+            logging.error(error)
 
     def on_fix_arch_clicked(self, widget):
         logging.info("Let's fix the keys of Arch Linux")
@@ -411,7 +423,7 @@ class Main:
         try:
             fn.shutil.copytree(path_dir, destination, dirs_exist_ok=True)
         except Exception as error:
-            logging.info(error)
+            logging.error(error)
 
         logging.info("We saved the scripts to ~/DATA/arcolinux-nemesis")
 
