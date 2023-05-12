@@ -21,7 +21,8 @@ from gi.repository import Gdk, GdkPixbuf, GLib, Gtk  # noqa
 
 # constant values
 BASE_DIR = fn.path.dirname(fn.path.realpath(__file__))
-GUI_UI_FILE = BASE_DIR + "/gGui.ui"
+# GUI_UI_FILE = BASE_DIR + "/gGui.ui"
+GUI_UI_FILE = BASE_DIR + "/gGui_statusbar.ui"
 LOGGING_FORMAT = "%Y-%m-%d-%H-%M-%S"
 LOG_FILE = "/var/log/arcolinux-app-glade/arcolinux-app-{}.log".format(
     datetime.now().strftime(LOGGING_FORMAT)
@@ -143,6 +144,11 @@ class Main:
         logging.info("Referencing the Gtk window 'hwindow' ID")
         window = self.builder.get_object("hWindow")
         window.connect("delete-event", Gtk.main_quit)
+
+        self.statusbar = self.builder.get_object("statusbar")
+
+        align = Gtk.Alignment(xalign=0.5, yalign=0.5)
+        align.add(self.statusbar)
 
         logging.info("Display main window")
         window.show()
