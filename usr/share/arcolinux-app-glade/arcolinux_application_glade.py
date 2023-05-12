@@ -147,17 +147,10 @@ class Main:
 
         self.statusbar = self.builder.get_object("statusbar")
 
-        message = Gtk.Label(label="Center-aligned message")
-        message.set_halign(Gtk.Align.CENTER)
-        message.set_valign(Gtk.Align.CENTER)
-        self.statusbarbox = Gtk.Box()
-        self.statusbarbox.set_halign(Gtk.Align.CENTER)
-        self.statusbarbox.set_valign(Gtk.Align.CENTER)
-        self.statusbarbox.pack_start(message, False, False, 0)
+        message = Gtk.Label(label="We will show all the messages here")
 
         context_id = self.statusbar.get_context_id("example")
         self.statusbar.push(context_id, message.get_text())
-        self.statusbar.pack_end(self.statusbarbox, False, False, 0)
 
         logging.info("Display main window")
         window.show()
