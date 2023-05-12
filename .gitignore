@@ -2,3 +2,4 @@
 /usr/share/arcolinux-app-glade/work
 /usr/share/arcolinux-app-glade/*.log
 /usr/share/arcolinux-app-glade/*~*
+/usr/share/arcolinux-app-glade/#*#
