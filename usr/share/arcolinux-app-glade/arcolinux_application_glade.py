@@ -22,7 +22,7 @@ from gi.repository import Gdk, GdkPixbuf, GLib, Gtk  # noqa
 # constant values
 BASE_DIR = fn.path.dirname(fn.path.realpath(__file__))
 # GUI_UI_FILE = BASE_DIR + "/gGui.ui"
-GUI_UI_FILE = BASE_DIR + "/gGui_statusbar_center.ui"
+GUI_UI_FILE = BASE_DIR + "/gGui.ui"
 LOGGING_FORMAT = "%Y-%m-%d-%H-%M-%S"
 LOG_FILE = "/var/log/arcolinux-app-glade/arcolinux-app-{}.log".format(
     datetime.now().strftime(LOGGING_FORMAT)
@@ -435,12 +435,13 @@ class Main:
         fn.install_package(self, package)
         fn.run_script(self, command)
         logging.info("We changed the content of your /etc/pacman.d/mirrorlist")
-        logging.info("Server = http://mirror.rackspace.com/archlinux/\$repo/os/\$arch")
-        logging.info("Server = https://mirror.rackspace.com/archlinux/\$repo/os/\$arch")
-        logging.info("Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch")
         logging.info("Server = https://mirror.osbeck.com/archlinux/\$repo/os/\$arch")
         logging.info("Server = http://mirror.osbeck.com/archlinux/\$repo/os/\$arch")
+        logging.info("Server = https://mirrors.kernel.org/archlinux/\$repo/os/\$arch")
         logging.info("Server = https://geo.mirror.pkgbuild.com/\$repo/os/\$arch")
+        logging.info("Server = http://mirror.rackspace.com/archlinux/\$repo/os/\$arch")
+        logging.info("Server = https://mirror.rackspace.com/archlinux/\$repo/os/\$arch")
+
         logging.info("Done")
         GLib.idle_add(
             fn.show_in_app_notification,
