@@ -3,7 +3,6 @@
 # =                  Author: Erik Dubois                          =
 # =================================================================
 
-import datetime
 import os
 import logging
 from datetime import datetime
