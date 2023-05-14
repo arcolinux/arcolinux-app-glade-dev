@@ -7,12 +7,8 @@
     <property name="type-hint">dialog</property>
     <property name="program-name">ArcoLinux App</property>
     <property name="comments" translatable="yes">Educational Project</property>
-    <property name="website">https://www.arcolinuxiso.com/arcolinux-app/</property>
-    <property name="website-label" translatable="yes">More info and tutorials</property>
-    <property name="authors">Erik Dubois
-Drunken Alcoholic</property>
+    <property name="authors">Erik Dubois</property>
     <property name="logo">../../../../arcolinux-app-glade/usr/share/arcolinux-app-glade/images/medallion.png</property>
-    <property name="license-type">gpl-3-0</property>
     <signal name="activate-link" handler="on_website_link_activate" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox">

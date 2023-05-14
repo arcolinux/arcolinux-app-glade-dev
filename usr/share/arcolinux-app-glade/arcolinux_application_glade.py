@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # ArcoLinux App - https://www.arcolinuxiso.com/arcolinux-app/
-# Copyright (C) 2023 EriK Dubois - Drunken Alcoholic
+# Copyright (C) 2023 EriK Dubois
 #
 # ArcoLinux App is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -594,7 +594,6 @@ class Main:
     def on_about_clicked(self, widget):
         # About dialog
         aboutwin = about.About()
-        # about_dialog = AboutDialog(parent=self.window)
 
     def on_quit_button_clicked(self, widget):
         # Ending the application
