@@ -1,7 +1,21 @@
-# =================================================================
-# =                  Author: Erik Dubois                          =
-# =================================================================
+#!/usr/bin/env python3
 
+# ArcoLinux App - https://www.arcolinuxiso.com/arcolinux-app/
+# Copyright (C) 2023 EriK Dubois - Drunken Alcoholic
+#
+# ArcoLinux App is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# ArcoLinux App is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Gufw; if not, see http://www.gnu.org/licenses for more
+# information.
 import os
 import shutil
 import subprocess
@@ -475,3 +489,7 @@ def timeOut(self):
 def close_in_app_notification(self):
     self.statusbar.pop(0)
     self.timeout_id = None
+
+
+def run_as_user(script):
+    subprocess.run(["su - " + sudo_username + " -c " + script], shell=False)
