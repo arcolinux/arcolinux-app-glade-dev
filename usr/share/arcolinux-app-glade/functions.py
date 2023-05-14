@@ -8,6 +8,9 @@ import subprocess
 from os import getlogin, listdir, mkdir, path, rmdir
 from pathlib import Path
 
+# we want our logging in the functions also
+import logging
+
 import psutil
 from distro import id
 from gi.repository import GLib
@@ -67,7 +70,7 @@ def get_lines(files):
                 f.close()
             return lines
     except Exception as error:
-        print(error)
+        logging.error(error)
 
 
 # getting the string in list
@@ -161,21 +164,20 @@ def install_package(self, package):
     command = "pacman -S " + package + " --noconfirm --needed"
     # if more than one package - checf fails and will install
     if check_package_installed(package):
-        print(
-            "[INFO] : The package " + package + " is already installed - nothing to do"
-        )
+        logging.info("The package %s is already installed - nothing to do", package)
+
     else:
         try:
-            print("[INFO] : Applying this command - " + command)
+            logging.info("Applying this command: %s", command)
             subprocess.run(
                 command.split(" "),
                 shell=False,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
             )
-            print("[INFO] : The package " + package + " is now installed")
+            logging.info("The package %sis now installed", package)
         except Exception as error:
-            print(error)
+            logging.error(error)
 
 
 # install ArcoLinux mirrorlist and key package
@@ -186,86 +188,84 @@ def install_arcolinux_key_mirror(self):
 
     try:
         command1 = "pacman -U " + pathway + str(file).strip("[]'") + " --noconfirm"
-        print("[INFO] : " + command1)
+        logging.info("Applying this command: %s", command1)
         subprocess.run(
             command1.split(" "),
             shell=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
         )
-        print("[INFO] : ArcoLinux keyring is now installed")
+        logging.info("ArcoLinux keyring is now installed")
     except Exception as error:
-        print(error)
+        logging.error(error)
 
     pathway = base_dir + "/packages/arcolinux-mirrorlist/"
     file = listdir(pathway)
     try:
         command2 = "pacman -U " + pathway + str(file).strip("[]'") + " --noconfirm"
-        print("[INFO] : " + command2)
+        logging.info("Applying this command: %s", command2)
         subprocess.run(
             command2.split(" "),
             shell=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
         )
-        print("[INFO] : ArcoLinux mirrorlist is now installed")
+        logging.info("ArcoLinux mirrorlist is now installed")
     except Exception as error:
-        print(error)
+        logging.error(error)
 
 
 # remove ArcoLinux mirrorlist and key package
 def remove_arcolinux_key_mirror(self):
     try:
         command1 = "pacman -Rdd arcolinux-keyring --noconfirm"
-        print("[INFO] : " + command1)
+        logging.info("Applying this command: %s", command1)
         subprocess.run(
             command1.split(" "),
             shell=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
         )
-        print("[INFO] : ArcoLinux keyring is now removed")
+        logging.info("ArcoLinux keyring is now removed")
     except Exception as error:
-        print(error)
+        logging.error(error)
 
     try:
         command2 = "pacman -Rdd arcolinux-mirrorlist-git --noconfirm"
-        print("[INFO] : " + command2)
+        logging.info("Applying this command: %s", command2)
         subprocess.run(
             command2.split(" "),
             shell=False,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
         )
-        print("[INFO] : ArcoLinux mirrorlist is now removed")
+        logging.info("ArcoLinux mirrorlist is now removed")
     except Exception as error:
-        print(error)
+        logging.error(error)
 
 
 # Ensuring that pacman does not crash - installing/removing keys and mirrors
 def pacman_safeguard():
     package = "arcolinux-mirrorlist-git"
     if not check_package_installed(package):
-        print("[INFO] : Removing the lines referring to the ArcoLinux repos")
+        logging.info("Removing the lines referring to the ArcoLinux repos")
         remove_repos()
 
 
 # Running a script from the Application App
-def run_script(self, command):
-    print("[INFO] : Applying this command")
-    print("[INFO] : " + command)
+def run_script(self, script):
+    logging.info("Running the following script: %s", command)
     try:
         subprocess.run(
             command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
     except Exception as error:
-        print(error)
+        logging.error(error)
 
 
 # Running an Arch Linux command
 def run_command(command):
-    print("[INFO] : Applying this command")
-    print("[INFO] : " + command)
+    logging.info("Applying this command %s", command)
     try:
         subprocess.run(
             command.split(" "),
@@ -274,13 +274,12 @@ def run_command(command):
             stderr=subprocess.STDOUT,
         )
     except Exception as error:
-        print(error)
+        logging.error(error)
 
 
 # Running command in Alacritty with --hold option
 def run_script_alacritty_hold(self, command):
-    print("[INFO] : Applying this command")
-    print("[INFO] : " + command)
+    logging.info("Applying this command %s", command)
     try:
         subprocess.run(
             "alacritty --hold -e" + command,
@@ -289,13 +288,12 @@ def run_script_alacritty_hold(self, command):
             stderr=subprocess.STDOUT,
         )
     except Exception as error:
-        print(error)
+        logging.error(error)
 
 
 # Running command in Alacritty without --hold option
 def run_script_alacritty(self, command):
-    print("[INFO] : Applying this command")
-    print("[INFO] : " + command)
+    self.logging.info("Applying this command %s", command)
     try:
         subprocess.run(
             "alacritty -e" + command,
@@ -304,7 +302,7 @@ def run_script_alacritty(self, command):
             stderr=subprocess.STDOUT,
         )
     except Exception as error:
-        print(error)
+        self.logging.error(error)
 
 
 # Check if path exists
@@ -320,7 +318,7 @@ def remove_dir(self, directory):
         try:
             shutil.rmtree(directory)
         except Exception as error:
-            print(error)
+            logging.error(error)
 
 
 # Change permissions
@@ -339,7 +337,7 @@ def permissions(dst):
                 group = g.replace(")", "").strip()
         subprocess.run(["chown", "-R", sudo_username + ":" + group, dst], shell=False)
     except Exception as error:
-        print(error)
+        logging.error(error)
 
 
 # append repositories - anything not ArcoLinux
@@ -349,20 +347,20 @@ def append_repo(text):
             f.write("\n\n")
             f.write(text)
     except Exception as error:
-        print(error)
+        logging.error(error)
 
 
 # add repositories
 def add_repos():
     if not repo_exist("[arcolinux_repo]"):
         if distr == "arcolinux":
-            print("[INFO] : Adding ArcoLinux repos on ArcoLinux")
+            logging.info("Adding ArcoLinux repos on ArcoLinux")
             try:
                 with open(pacman_conf, "r", encoding="utf-8") as f:
                     lines = f.readlines()
                     f.close()
             except Exception as error:
-                print(error)
+                logging.error(error)
 
             text = (
                 "\n\n"
@@ -383,22 +381,22 @@ def add_repos():
                 with open(pacman_conf, "w", encoding="utf-8") as f:
                     f.writelines(lines)
             except Exception as error:
-                print(error)
+                logging.error(error)
         else:
             if not repo_exist("[arcolinux_repo_testing]"):
-                print("[INFO] : Adding ArcoLinux test repo (not used)")
+                logging.info("Adding ArcoLinux test repo (not used)")
                 append_repo(atestrepo)
             if not repo_exist("[arcolinux_repo]"):
-                print("[INFO] : Adding ArcoLinux repo")
+                logging.info("Adding ArcoLinux repo")
                 append_repo(arepo)
             if not repo_exist("[arcolinux_repo_3party]"):
-                print("[INFO] : Adding ArcoLinux 3th party repo")
+                logging.info("Adding ArcoLinux 3th party repo")
                 append_repo(a3prepo)
             if not repo_exist("[arcolinux_repo_xlarge]"):
-                print("[INFO] : Adding ArcoLinux XL repo")
+                logging.info("Adding ArcoLinux XL repo")
                 append_repo(axlrepo)
             if repo_exist("[arcolinux_repo]"):
-                print("[INFO] : ArcoLinux repos have been installed")
+                logging.info("ArcoLinux repos have been installed")
 
 
 # Removing repos
@@ -440,7 +438,7 @@ def remove_repos():
             f.close()
 
     except Exception as error:
-        print(error)
+        logging.error(error)
 
 
 # Install packages from a path + filename
@@ -450,7 +448,7 @@ def install_packages_path(self, path):
             lines = f.readlines()
             f.close()
     except Exception as error:
-        print(error)
+        logging.error(error)
 
     for line in lines:
         line = line.strip("\n")
