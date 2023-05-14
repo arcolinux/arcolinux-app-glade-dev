@@ -2,7 +2,6 @@
 # =                  Author: Erik Dubois                          =
 # =================================================================
 
-import datetime
 import os
 import shutil
 import subprocess
@@ -71,6 +70,7 @@ def get_lines(files):
         print(error)
 
 
+# getting the string in list
 def __get_position(lists, string):
     data = [x for x in lists if string in x]
     pos = lists.index(data[0])
@@ -146,7 +146,6 @@ def check_package_installed(package):
 
 # check if repo exists
 def repo_exist(value):
-    """check repo_exists"""
     with open(pacman_conf, "r", encoding="utf-8") as f:
         lines = f.readlines()
         f.close()
@@ -168,7 +167,7 @@ def install_package(self, package):
     else:
         try:
             print("[INFO] : Applying this command - " + command)
-            subprocess.call(
+            subprocess.run(
                 command.split(" "),
                 shell=False,
                 stdout=subprocess.PIPE,
@@ -188,7 +187,7 @@ def install_arcolinux_key_mirror(self):
     try:
         command1 = "pacman -U " + pathway + str(file).strip("[]'") + " --noconfirm"
         print("[INFO] : " + command1)
-        subprocess.call(
+        subprocess.run(
             command1.split(" "),
             shell=False,
             stdout=subprocess.PIPE,
@@ -203,7 +202,7 @@ def install_arcolinux_key_mirror(self):
     try:
         command2 = "pacman -U " + pathway + str(file).strip("[]'") + " --noconfirm"
         print("[INFO] : " + command2)
-        subprocess.call(
+        subprocess.run(
             command2.split(" "),
             shell=False,
             stdout=subprocess.PIPE,
@@ -219,7 +218,7 @@ def remove_arcolinux_key_mirror(self):
     try:
         command1 = "pacman -Rdd arcolinux-keyring --noconfirm"
         print("[INFO] : " + command1)
-        subprocess.call(
+        subprocess.run(
             command1.split(" "),
             shell=False,
             stdout=subprocess.PIPE,
@@ -232,7 +231,7 @@ def remove_arcolinux_key_mirror(self):
     try:
         command2 = "pacman -Rdd arcolinux-mirrorlist-git --noconfirm"
         print("[INFO] : " + command2)
-        subprocess.call(
+        subprocess.run(
             command2.split(" "),
             shell=False,
             stdout=subprocess.PIPE,
@@ -243,6 +242,7 @@ def remove_arcolinux_key_mirror(self):
         print(error)
 
 
+# Ensuring that pacman does not crash - installing/removing keys and mirrors
 def pacman_safeguard():
     package = "arcolinux-mirrorlist-git"
     if not check_package_installed(package):
@@ -250,50 +250,24 @@ def pacman_safeguard():
         remove_repos()
 
 
+# Running a script from the Application App
 def run_script(self, command):
     print("[INFO] : Applying this command")
     print("[INFO] : " + command)
     try:
-        subprocess.call(
+        subprocess.run(
             command, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
         )
     except Exception as error:
         print(error)
 
 
-def run_script_alacritty_hold(self, command):
-    print("[INFO] : Applying this command")
-    print("[INFO] : " + command)
-    try:
-        subprocess.call(
-            "alacritty --hold -e" + command,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        )
-    except Exception as error:
-        print(error)
-
-
-def run_script_alacritty(self, command):
-    print("[INFO] : Applying this command")
-    print("[INFO] : " + command)
-    try:
-        subprocess.call(
-            "alacritty -e" + command,
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-        )
-    except Exception as error:
-        print(error)
-
-
+# Running an Arch Linux command
 def run_command(command):
     print("[INFO] : Applying this command")
     print("[INFO] : " + command)
     try:
-        subprocess.call(
+        subprocess.run(
             command.split(" "),
             shell=False,
             stdout=subprocess.PIPE,
@@ -303,13 +277,44 @@ def run_command(command):
         print(error)
 
 
-# check if path exists
+# Running command in Alacritty with --hold option
+def run_script_alacritty_hold(self, command):
+    print("[INFO] : Applying this command")
+    print("[INFO] : " + command)
+    try:
+        subprocess.run(
+            "alacritty --hold -e" + command,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+    except Exception as error:
+        print(error)
+
+
+# Running command in Alacritty without --hold option
+def run_script_alacritty(self, command):
+    print("[INFO] : Applying this command")
+    print("[INFO] : " + command)
+    try:
+        subprocess.run(
+            "alacritty -e" + command,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+    except Exception as error:
+        print(error)
+
+
+# Check if path exists
 def path_check(path):
     if os.path.isdir(path):
         return True
     return False
 
 
+# Remove directory
 def remove_dir(self, directory):
     if path_check(directory):
         try:
@@ -318,6 +323,7 @@ def remove_dir(self, directory):
             print(error)
 
 
+# Change permissions
 def permissions(dst):
     try:
         groups = subprocess.run(
@@ -331,22 +337,13 @@ def permissions(dst):
             if "gid" in x:
                 g = x.split("(")[1]
                 group = g.replace(")", "").strip()
-        subprocess.call(["chown", "-R", sudo_username + ":" + group, dst], shell=False)
+        subprocess.run(["chown", "-R", sudo_username + ":" + group, dst], shell=False)
     except Exception as error:
         print(error)
 
 
-# =====================================================
-#               END GLOBAL FUNCTIONS
-# =====================================================
-
-# =====================================================
-#               START PACMAN.CONF
-# =====================================================
-
-
+# append repositories - anything not ArcoLinux
 def append_repo(text):
-    """Append a new repo"""
     try:
         with open(pacman_conf, "a", encoding="utf-8") as f:
             f.write("\n\n")
@@ -355,6 +352,7 @@ def append_repo(text):
         print(error)
 
 
+# add repositories
 def add_repos():
     if not repo_exist("[arcolinux_repo]"):
         if distr == "arcolinux":
@@ -403,8 +401,8 @@ def add_repos():
                 print("[INFO] : ArcoLinux repos have been installed")
 
 
+# Removing repos
 def remove_repos():
-    """remove the repo"""
     try:
         with open(pacman_conf, "r", encoding="utf-8") as f:
             lines = f.readlines()
@@ -445,28 +443,7 @@ def remove_repos():
         print(error)
 
 
-# =====================================================
-#                     LOGGING
-# =====================================================
-
-
-def create_actions_log(launchtime, message):
-    if not os.path.exists(log_dir + launchtime):
-        try:
-            with open(log_dir + launchtime, "x", encoding="utf8") as f:
-                f.close
-        except Exception as error:
-            print(error)
-
-    if os.path.exists(log_dir + launchtime):
-        try:
-            with open(log_dir + launchtime, "a", encoding="utf-8") as f:
-                f.write(message)
-                f.close()
-        except Exception as error:
-            print(error)
-
-
+# Install packages from a path + filename
 def install_packages_path(self, path):
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -481,33 +458,22 @@ def install_packages_path(self, path):
             install_package(self, line)
 
 
-# =====================================================
-#               NOTIFICATIONS
-# =====================================================
-
-
+# Show the in-app notification
 def show_in_app_notification(self, message, err):
     if self.timeout_id is not None:
         GLib.source_remove(self.timeout_id)
         self.timeout_id = None
+    self.statusbar.push(0, message)
 
-    if err == True:
-        self.notification_label.set_markup(
-            '<span background="yellow" foreground="black">' + message + "</span>"
-        )
-    else:
-        self.notification_label.set_markup(
-            '<span foreground="white">' + message + "</span>"
-        )
-    self.notification_revealer.set_reveal_child(True)
     self.timeout_id = GLib.timeout_add(3000, timeOut, self)
 
 
+# Timeout for the in-app message
 def timeOut(self):
     close_in_app_notification(self)
 
 
+# Do not show the in-app message
 def close_in_app_notification(self):
-    self.notification_revealer.set_reveal_child(False)
-    GLib.source_remove(self.timeout_id)
+    self.statusbar.pop(0)
     self.timeout_id = None
