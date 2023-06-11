@@ -591,6 +591,16 @@ class Main:
         else:
             logging.info("First select a file")
 
+    def on_asa_install_clicked(self, widget):
+        fn.install_arcolinux_spices_application(self)
+        # Sending an in-app message
+        GLib.idle_add(
+            fn.show_in_app_notification,
+            self,
+            "We have installed the ASA",
+            False,
+        )
+
     def on_att_install_clicked(self, widget):
         fn.install_archlinux_tweak_tool(self)
         # Sending an in-app message
