@@ -194,6 +194,26 @@ def install_package(self, package):
             logging.error(error)
 
 
+# install ArchLinux Tweak Tool
+def install_archlinux_tweak_tool(self):
+    base_dir = path.dirname(path.realpath(__file__))
+    pathway = base_dir + "/packages/att/"
+    file = listdir(pathway)
+
+    try:
+        command1 = "pacman -U " + pathway + str(file).strip("[]'") + " --noconfirm"
+        logging.info("Applying this command: %s", command1)
+        subprocess.run(
+            command1.split(" "),
+            shell=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        logging.info("ArchLinux Tweak Tool (ATT) is now installed")
+    except Exception as error:
+        logging.error(error)
+
+
 # install ArcoLinux mirrorlist and key package
 def install_arcolinux_key_mirror(self):
     base_dir = path.dirname(path.realpath(__file__))
