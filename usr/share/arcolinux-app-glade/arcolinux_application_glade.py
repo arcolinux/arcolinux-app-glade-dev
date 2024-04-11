@@ -142,9 +142,9 @@ class Main:
             except Exception as error:
                 logging.error(error)
 
-        if fn.path.isdir("/root/arconet-Out/"):
+        if fn.path.isdir("/root/arconet-out/"):
             try:
-                fn.remove_dir(self, "/root/arconet-Out/")
+                fn.remove_dir(self, "/root/arconet-out/")
                 logging.info("Removing old builds")
                 logging.info("This may take a while - be patient")
             except Exception as error:
