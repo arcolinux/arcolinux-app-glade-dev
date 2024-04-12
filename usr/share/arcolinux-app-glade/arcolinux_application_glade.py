@@ -370,7 +370,7 @@ class Main:
         elif self.choice == "arcopro":
             dir = "arcopro-out"
         else:
-            dir = "arcoplasma-out"
+            dir = "arcoplasma-Out"
 
         # Moving the iso to home directory of the user
         path_dir = "/root/" + dir
