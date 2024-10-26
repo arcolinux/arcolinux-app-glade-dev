@@ -496,7 +496,9 @@ class Main:
         print("We change this so we can build the Arch Linux iso via AAG")
 
         # starting the Arch Linux build script
-        command = "mkarchiso -v -o " + fn.home + " /usr/share/archiso/configs/releng/"
+        command = (
+            "mkarchiso -v -r -o " + fn.home + " /usr/share/archiso/configs/releng/"
+        )
         try:
             fn.run_command(command)
         except Exception as error:
