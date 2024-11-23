@@ -340,6 +340,10 @@ class Main:
         package = "archiso"
         fn.install_package(self, package)
 
+        # installing grub if needed
+        package = "grub"
+        fn.install_package(self, package)
+
         # if arcolinux mirror and key not installed
         if not fn.check_package_installed(
             "arcolinux-keyring"
