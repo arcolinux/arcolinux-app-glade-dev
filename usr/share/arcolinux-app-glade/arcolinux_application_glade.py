@@ -279,6 +279,11 @@ class Main:
         logging.info(
             "---------------------------------------------------------------------------"
         )
+        logging.info("[INFO] : User = " + fn.sudo_username)
+        fn.findgroup()
+        logging.info(
+            "---------------------------------------------------------------------------"
+        )
 
     def setup_gui(self):
         self.timeout_id = None
