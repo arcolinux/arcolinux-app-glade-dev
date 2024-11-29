@@ -417,6 +417,8 @@ def remove_dir(self, directory):
         except Exception as error:
             logging.error(error)
 
+
+# Change permissions
 def permissions(dst):
     try:
         groups = subprocess.run(
