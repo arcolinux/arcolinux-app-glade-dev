@@ -442,7 +442,7 @@ def permissions(dst):
 
         subprocess.call(["chown", "-R", sudo_username + ":" + group, dst], shell=False)
     except Exception as error:
-        print(error)
+        logging.error(error)
 
 def findgroup():
     try:
@@ -469,7 +469,7 @@ def findgroup():
         logging.info("[INFO] : Group = " + group)
 
     except Exception as error:
-        print(error)
+        logging.error(error)
 
 # append repositories - anything not ArcoLinux
 def append_repo(text):
