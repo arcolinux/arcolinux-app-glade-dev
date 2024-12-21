@@ -22,7 +22,7 @@ import re
 import logging
 from datetime import datetime
 from time import sleep
-
+import subprocess
 import functions as fn
 
 # Importing gi
@@ -174,6 +174,24 @@ class Main:
         if fn.path.isdir("/tmp/sierra/"):
             try:
                 fn.remove_dir(self, "/tmp/sierra")
+                logging.info("Removing old githubs in /tmp")
+                logging.info("This may take a while - be patient")
+            except Exception as error:
+                logging.error(error)
+
+        # archlive
+        if fn.path.isdir("/tmp/archlive/"):
+            try:
+                fn.remove_dir(self, "/tmp/archlive")
+                logging.info("Removing old githubs in /tmp")
+                logging.info("This may take a while - be patient")
+            except Exception as error:
+                logging.error(error)
+
+        # arcoinstall
+        if fn.path.isdir("/tmp/arcoinstall/"):
+            try:
+                fn.remove_dir(self, "/tmp/arcoinstall")
                 logging.info("Removing old githubs in /tmp")
                 logging.info("This may take a while - be patient")
             except Exception as error:
@@ -713,17 +731,32 @@ class Main:
         package = "archiso"
         fn.install_package(self, package)
 
-        # making sure we start with a clean slate
-        logging.info("Let's remove any old previous building folders")
-        fn.remove_dir(self, "/tmp/arcoinstall/")
-        fn.remove_dir(self, "/tmp/archlive/")
+        # remove archlive
+        targetlive_dir = "/tmp/archlive"
 
-        # git clone the iso scripts
-        command = (
-            "git clone https://github.com/arconetpro/arcoinstall.git" + " /tmp/arcoinstall"
-        )
+        if os.path.exists(targetlive_dir) and os.path.isdir(targetlive_dir):
+            try:
+                fn.shutil.rmtree(targetlive_dir)
+                logging.info(f"Removed existing directory: {targetlive_dir}")
+            except Exception as error:
+                logging.error(f"Failed to remove directory {targetlive_dir}: {error}")
+                return
+            
+        # git clone the iso scripts and remove first
+        repo_url = "https://github.com/arconetpro/arcoinstall.git"
+        target_dir = "/tmp/arcoinstall"
 
+        if os.path.exists(target_dir) and os.path.isdir(target_dir):
+            try:
+                fn.shutil.rmtree(target_dir)
+                logging.info(f"Removed existing directory: {target_dir}")
+            except Exception as error:
+                logging.error(f"Failed to remove directory {target_dir}: {error}")
+                return
+
+        command = f"git clone {repo_url} {target_dir}"
         logging.info("git cloning the build folder")
+        logging.info(command)
         try:
             fn.run_command(command)
         except Exception as error:
@@ -739,27 +772,35 @@ class Main:
         logging.info(
             "##################################################################"
         )
-        logging.info("Changed to /tmp/arcoinstall")
-        fn.os.chdir("/tmp/arcoinstall")
 
-        # Preparing to launch the build
-        command = "/tmp/arcoinstall/build_iso.sh"
+        target_dir = "/tmp/arcoinstall"
+        command = "./build_iso.sh"  # Relative path since cwd will be set
+        critty = ["alacritty", "-e"]
 
-        logging.info("Launching the building script")
+        if not (os.path.exists(target_dir) and os.path.isdir(target_dir)):
+            logging.error("Directory does not exist: %s", target_dir)
+            return
 
-        # Checking whether switch is on
-        critty = "alacritty -e "
-        logging.info(critty + command)
-        # Launching the build
+        full_command = critty + [command]
+        logging.info("Launching command with Alacritty in directory: %s", target_dir)
+        logging.info("Full command: %s", ' '.join(full_command))
+
         try:
-            fn.subprocess.call(
-                critty + command,
-                shell=True,
-                stdout=fn.subprocess.PIPE,
-                stderr=fn.subprocess.STDOUT,
+            subprocess.run(
+                full_command,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                cwd=target_dir  # Set working directory specifically for this command
             )
+            logging.info("Command executed successfully.")
+        except subprocess.CalledProcessError as error:
+            logging.error("Command failed with return code %s: %s", error.returncode, error.output)
+        except FileNotFoundError:
+            logging.error("Alacritty is not installed or not available in PATH.")
         except Exception as error:
-            logging.error(error)
+            logging.error("Unexpected error: %s", error)
 
         # change the output - foldername
         dir = "arcoinstall-Out"
