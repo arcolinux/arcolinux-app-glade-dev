@@ -253,7 +253,7 @@
                     <child>
                       <object class="GtkBox" id="arcoinstall">
                         <property name="width-request">100</property>
-                        <property name="height-request">30</property>
+                        <property name="height-request">20</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="spacing">10</property>
@@ -262,6 +262,7 @@
                             <property name="width-request">100</property>
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="margin-right">365</property>
                             <property name="label" translatable="yes">Create your personal Arcoinstall iso:</property>
                           </object>
                           <packing>
