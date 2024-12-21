@@ -526,13 +526,24 @@ class Main:
         print("We change this so we can build the Arch Linux iso via AAG")
 
         # starting the Arch Linux build script
-        command = (
-            "mkarchiso -v -r -o " + fn.home + " /usr/share/archiso/configs/releng/"
-        )
+        critty = ["alacritty", "-e"]
+        command = f"mkarchiso -v -r -o {fn.home} /usr/share/archiso/configs/releng/"
+        full_command = critty + ["bash", "-c", command]
         try:
-            fn.run_command(command)
+            subprocess.run(
+                full_command,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+            )
+            logging.info("Command executed successfully.")
+        except subprocess.CalledProcessError as error:
+            logging.error("Command failed with return code %s: %s", error.returncode, error.output)
+        except FileNotFoundError:
+            logging.error("Alacritty is not installed or not available in PATH.")
         except Exception as error:
-            logging.error(error)
+            logging.error("Unexpected error: %s", error)
 
         fn.shutil.move(backup_file_path, file_path)
         print("The original pacman.conf has been restored.")
