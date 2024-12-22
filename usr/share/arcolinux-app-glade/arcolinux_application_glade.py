@@ -556,7 +556,37 @@ class Main:
         iso_name = "/archlinux-" + year + "." + month + "." + day + "-x86_64.iso"
         destination = fn.home + iso_name
         fn.permissions(destination)
+
+        # Configuration
+        FOLDER_NAME = "archlinux-Out"
+
+        # Define source and destination paths
+        iso_source = destination  # Source ISO file path
+        destination_folder = os.path.join(fn.home, FOLDER_NAME)  # Destination folder path
+        destination_file = os.path.join(destination_folder, os.path.basename(iso_name))  # Full path in destination folder
+
+        logging.info("Moving ISO file into the user's home directory folder.")
+
+        try:
+            # Ensure the destination folder exists
+            os.makedirs(destination_folder, exist_ok=True)
+
+            # Copy the ISO file into the folder
+            fn.shutil.move(iso_source, destination_file)
+            logging.info(f"Successfully moved file from {iso_source} to {destination_file}")
+
+        except FileNotFoundError:
+            logging.error(f"Source file '{iso_source}' does not exist.")
+        except PermissionError:
+            logging.error("Permission denied. Ensure you have the necessary permissions.")
+        except fn.shutil.SameFileError:
+            logging.error("Source and destination represent the same file.")
+        except Exception as error:
+            logging.error(f"An unexpected error occurred: {error}")
+
         logging.info("Check your home directory for the iso")
+
+        fn.permissions(destination_folder)
 
         # making sure we start with a clean slate
         if fn.path_check(fn.base_dir + "/work"):
